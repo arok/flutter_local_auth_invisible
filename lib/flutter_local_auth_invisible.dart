@@ -64,8 +64,8 @@ class LocalAuthentication {
   /// authentication (e.g. lack of relevant hardware). This might throw
   /// [PlatformException] with error code [otherOperatingSystem] on the iOS
   /// simulator.
-  Future<bool> authenticateWithBiometrics({
-    @required String localizedReason,
+  Future<bool?> authenticateWithBiometrics({
+    required String localizedReason,
     bool useErrorDialogs = true,
     bool stickyAuth = false,
     bool showFPDialog = false,
@@ -100,7 +100,7 @@ class LocalAuthentication {
   ///
   /// Returns a [Future] bool true or false:
   Future<bool> get canCheckBiometrics async =>
-      (await _channel.invokeListMethod<String>('getAvailableBiometrics'))
+      (await _channel.invokeListMethod<String>('getAvailableBiometrics'))!
           .isNotEmpty;
 
   /// Returns true if auth was cancelled successfully.
@@ -108,9 +108,9 @@ class LocalAuthentication {
   /// Returns false if there was some error or no auth in progress.
   ///
   /// Returns [Future] bool true or false:
-  Future<bool> stopAuthentication() {
+  Future<bool> stopAuthentication() async {
     if (_platform.isAndroid) {
-      return _channel.invokeMethod<bool>('stopAuthentication');
+      return (await _channel.invokeMethod<bool>('stopAuthentication'))!;
     }
     return Future<bool>.sync(() => true);
   }
@@ -123,7 +123,7 @@ class LocalAuthentication {
   /// - BiometricType.iris (not yet implemented)
   Future<List<BiometricType>> getAvailableBiometrics() async {
     final List<String> result =
-        (await _channel.invokeListMethod<String>('getAvailableBiometrics'));
+        (await (_channel.invokeListMethod<String>('getAvailableBiometrics') as FutureOr<List<String>>));
     final List<BiometricType> biometrics = <BiometricType>[];
     result.forEach((String value) {
       switch (value) {
